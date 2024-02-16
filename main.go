@@ -40,7 +40,7 @@ func main(){
 	/*
 	Usage
 
-	$ ./main -source=[Data Collection Type] -save_path=[Directory PATH]
+	$ go run main.go -source=[Data Collection Type] -save_path=[Directory PATH]
 
 	- [Data Collection Type]: Choose one among `android`|`malware`|`normal`|`iot`
 	- [Directory PATH]: Directory where the downloaded resource will be placed in
