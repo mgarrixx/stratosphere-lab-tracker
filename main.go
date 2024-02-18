@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
 	"github.com/PuerkitoBio/goquery"
 )
 
@@ -25,34 +26,34 @@ Traffic collections
 const BASE_URL = "https://mcfp.felk.cvut.cz/publicDatasets"
 
 type URL_INFO struct {
-	url string
+	url    string
 	prefix string
 }
 
 var DATA_SOURCES = map[string]URL_INFO{
-    "android": URL_INFO{"Android-Mischief-Dataset/AndroidMischiefDataset_v2/", "RAT"},
-    "malware": URL_INFO{"", "CTU-Malware-Capture-Botnet"},
-    "normal": URL_INFO{"", "CTU-Normal"},
-	"iot": URL_INFO{"IoT-23-Dataset-v2/", "CTU-"},
+	"android": URL_INFO{"Android-Mischief-Dataset/AndroidMischiefDataset_v2/", "RAT"},
+	"malware": URL_INFO{"", "CTU-Malware-Capture-Botnet"},
+	"normal":  URL_INFO{"", "CTU-Normal"},
+	"iot":     URL_INFO{"IoT-23-Dataset-v2/", "CTU-"},
 }
 
-func main(){
+func main() {
 	/*
-	Usage
+		Usage
 
-	$ go run main.go -source=[Data Collection Type] -save_path=[Directory PATH]
+		$ go run main.go -source=[Data Collection Type] -save_path=[Directory PATH]
 
-	- [Data Collection Type]: Choose one among `android`|`malware`|`normal`|`iot`
-	- [Directory PATH]: Directory where the downloaded resource will be placed in
+		- [Data Collection Type]: Choose one among `android`|`malware`|`normal`|`iot`
+		- [Directory PATH]: Directory where the downloaded resource will be placed in
 	*/
 	source := flag.String("source", "malware", "Choose one among `android`|`malware`|`normal`|`iot`")
-    save_path := flag.String("save_path", ".", "Directory where the downloaded resource will be placed in")
- 
-    flag.Parse()
+	save_path := flag.String("save_path", ".", "Directory where the downloaded resource will be placed in")
+
+	flag.Parse()
 
 	source_info, ok := DATA_SOURCES[*source]
 
-	if ! ok {
+	if !ok {
 		log.Fatal("[Error] Choose one of the following data sources: `android`, `malware`, `normal`, `iot`\n")
 	}
 
@@ -94,7 +95,11 @@ func DownloadResource(url_path string, dir_path string, prefix string, depth int
 	doc.Find("table td a").Each(func(i int, s *goquery.Selection) {
 		link, _ := s.Attr("href")
 
-		if ! strings.HasPrefix(link, prefix) {
+		if strings.HasSuffix(url_path, link) {
+			return
+		}
+
+		if !strings.HasPrefix(link, prefix) {
 			return
 		}
 
@@ -117,6 +122,10 @@ func DownloadResource(url_path string, dir_path string, prefix string, depth int
 // Download from a given url to a file.
 func DownloadFile(url_path string, file_path string, depth int) {
 	fmt.Printf("%s└── %s\n", strings.Repeat("    ", depth), file_path[strings.LastIndex(file_path, "/")+1:])
+
+	if _, err := os.Stat(file_path); err == nil {
+		return
+	}
 
 	out, err := os.Create(file_path)
 
